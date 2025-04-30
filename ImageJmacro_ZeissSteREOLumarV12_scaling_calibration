@@ -1,0 +1,63 @@
+run("Bio-Formats Macro Extensions");
+
+// FIJI/Imagej macro to detect Stereo Zoom setting from .czi metadata and set correct scaling
+// for Zeiss StereoLumar V12 Microscope with ApoLumar 1.2x objective
+// Kate Randall 2025
+
+
+// manually calculated calibration constant Kavg
+K = 1.014;
+
+
+// prompt to select the input folder
+inputDir = getDirectory("Choose the folder containing .czi files from Zeiss SteREOLumarV12");
+
+
+// prompt to select output directory
+outputDir = getDirectory("Choose the folder to save processed images");
+
+
+// get a list of all files in the input directory
+fileList = getFileList(inputDir);
+
+// loop through each file in the directory
+for (i = 0; i < fileList.length; i++) {
+    filename = fileList[i];
+
+    // process only .czi files
+    if (endsWith(filename, ".czi")) {
+        fullPath = inputDir + filename;
+        print("Processing: " + filename);
+
+        // open the image using Bio-Formats
+        run("Bio-Formats Importer", "open=[" + fullPath + "] autoscale color_mode=Default view=Hyperstack stack_order=XYCZT");
+
+        // set current file
+        Ext.setId(fullPath);
+
+        // pull Zoom setting from metadata
+        Ext.getMetadataValue("Information|Image|TotalMagnification", totalMag);
+
+        // skip file if Zoom setting not retrieved
+        if (totalMag == "") {
+            print("TotalMagnification not found for " + filename + ". Skipping.");
+            close();
+            continue;
+        }
+
+        // convert TotalMagnification to number
+        totalMagValue = parseFloat(totalMag);
+
+        // calculate pixel size using measured scaling constant Kavg
+        pixelSize= K / totalMagValue;
+
+        // set image scale
+        run("Properties...", "unit=micron pixel_width=" + pixelSize + " pixel_height=" + pixelSize + " voxel_depth=1.0");
+
+        // save calibrated image as .tiff
+        saveAs("Tiff", outputDir + filename + "_scaleCalibrated.tif");
+
+        // close image
+        close();
+    }
+}
