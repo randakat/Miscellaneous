@@ -1,0 +1,6 @@
+ffmpeg -i <INPUT.AVI> -c:v libx264 -preset slow -crf 20 <OUTPUT.MP4>
+
+# flag explanations:
+# c:v libx264 = encodes in H.264 format (compatible with PowerPoint)
+# preset slow = good file compression without being painfully slow
+# crf = Constant Rate Factor (file size vs picture quality, range 0 (lossless) to 51 (potato))
