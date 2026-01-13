@@ -1,9 +1,0 @@
-# start agat
-conda create -n agat_env -c bioconda -c conda-forge agat
-conda activate agat_env
-
-# clean original gff3 
-agat_convert_sp_gxf2gxf --gff schMedS3_h1_ENCODE_hybrid_agat_hconf.gff3 -o schMedS3_h1_KR.gff3 #this adds UTRs missing from original gff3
-
-# convert to gtf
-agat_convert_sp_gff2gtf.pl --gff schMedS3_h1_KR.gff3 -o schMedS3_h1_KR.gtf
